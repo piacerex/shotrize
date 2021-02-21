@@ -1,0 +1,25 @@
+host = "https://api.epsonconnect.com"
+root = "/api/1/printing"
+printer_id = "8f66cc6703f5431c8eec63d8d0fe34ac"
+
+IO.puts "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+IO.puts "[params]"
+IO.inspect params[ "data" ]
+IO.puts "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+
+tokens = Json.post( host, "#{ root }/oauth2/auth/token?subject=printer", "grant_type=password&username=jxh51408xs2md2@print.epsonconnect.com&password=", [ "Content-Type": "application/x-www-form-urlencoded; charset=utf-8", "Authorization": "Basic Y2NhMjdhZmNmNDIzNDEzOWI2N2YxMzdlMDQ4MjY2M2Q6d0xlRDlDR3JGU3JuMlhOcUhjeFZVWUhkSWNhR1lyQmJzZmlOMHM0VnhRdjZuOUl2OFcyYklsWUxmbFZNU3hnRw==" ] )
+
+job = Json.post( host, "#{ root }/printers/#{ printer_id }/jobs", "{ \"job_name\": \"test-job\", \"print_mode\": \"photo\", \"print_setting\": { \"media_size\": \"ms_l\", \"media_type\": \"mt_photopaper\", \"borderless\": false, \"print_quality\": \"normal\", \"source\": \"front1\", \"color_mode\": \"color\", \"2_sided\": \"none\", \"reverse_order\": false, \"copies\": 1, \"collate\": false } }", "Content-Type": "application/json; charset=utf-8", "Authorization": "Bearer #{ tokens[ "access_token" ] }" )
+
+# filename = "C:/Users/masq_/AppData/LocalLow/Solirax/NeosVR/Assets/" <> ( params[ "data" ] |> String.split( "/" ) |> List.last )
+filename = ( params[ "data" ] |> String.split( "/" ) |> List.last )
+Json.post_no_response( "#{ job[ "upload_uri" ] }&File=1.png", "", File.read!( filename ), "Content-Type": "application/octet-stream" )
+Json.post( host, "#{ root }/printers/#{ printer_id }/jobs/#{ job[ "id" ] }/print", "", "Content-Type": "application/json; charset=utf-8", "Authorization": "Bearer #{ tokens[ "access_token" ] }" )
+
+result = Json.get( host, "#{ root }/printers/#{ printer_id }/jobs/#{ job[ "id" ] }", "Authorization": "Bearer #{ tokens[ "access_token" ] }" )
+IO.puts "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+IO.puts "[result]"
+IO.inspect result
+IO.puts "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+
+{ :ok, "" }

@@ -1,0 +1,6 @@
+datas = Db.query( "select * from projectors where id = #{ params[ "id" ] }" ) |> Db.columns_rows
+if datas == [] || Enum.count( datas ) > 1 do
+	{ :not_found, "Not Found" |> Rest.error_body }
+else
+	List.first( datas )
+end

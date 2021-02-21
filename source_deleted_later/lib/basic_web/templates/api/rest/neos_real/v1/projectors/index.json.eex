@@ -1,0 +1,1 @@
+Db.query( "select * from projectors" ) |> Db.columns_rows

@@ -1,0 +1,29 @@
+relative_path = params[ "path" ]
+if relative_path == "" || relative_path == nil do
+	{ :error, "Path was empty..." }
+else
+	pwd = File.cwd!()
+	folder = Application.fetch_env!( :sphere, :content_folder )
+	content_path = [ pwd, folder ] |> Path.join
+	absolute_path = [ pwd, folder, relative_path ] |> Path.join
+	result = File.rm( absolute_path )
+
+	try do
+		repo = Git.new( content_path )
+		Git.status!( repo )
+		Git.add!( repo, "." )
+		Git.commit!( repo, [ "-m", "Sphere remove with Elixir Git CLI" ] )
+		Git.push!( repo, [ "-f" ] )
+	rescue
+		error -> 
+			IO.puts "-----------------------------------------"
+			IO.puts "[[[ Github remove commit/push failure ]]]"
+			IO.inspect error
+			IO.puts "-----------------------------------------"
+	end
+
+	case result do
+		:ok -> { :ok, "" }
+		_   -> result
+	end
+end
