@@ -81,20 +81,20 @@ http://ocalhost:4000/api/mnesia/start
 下記をmixコマンド（mix.shotrize apply）として構成する（mixコマンド雛形はGithubにある通り）
 
 - ファイル追加
- - basic_web/controllers/api_controller.ex
- - basic_web/controllers/rest_api_controller.ex
- - util/rest.ex
+  - basic_web/controllers/api_controller.ex
+  - basic_web/controllers/rest_api_controller.ex
+  - util/rest.ex
 - 既存ファイル書き換え
- - router.ex　※強制上書きにするか？それともphx.gen.jsonのようにmixコマンド実行時のガイド出力とするか？
- - controllers/page_controller.ex
+  - router.ex　※強制上書きにするか？それともphx.gen.jsonのようにmixコマンド実行時のガイド出力とするか？
+  - controllers/page_controller.ex
 - 機能追加・改修　※ここはkoyoさんの対象範囲外
- - phx.routes相当の追加
+  - phx.routes相当の追加
 
 # EPSONプリンタラッパーAPIのリファクタリングTODO
 
 - 各Json.postのbody指定（第3引数）が文字列一発で読みにく過ぎる
- - JSON文字列で指定してるところは、Elixirマップでの組み立て＋Jason.encodeに変更
- - POSTパラメータ指定してるところは、Elixirマップでの組み立て＋独自パーサに変更
+  - JSON文字列で指定してるところは、Elixirマップでの組み立て＋Jason.encodeに変更
+  - POSTパラメータ指定してるところは、Elixirマップでの組み立て＋独自パーサに変更
 - 各Json.postのheader指定（第4引数以降）をキーワードリスト指定なのを生かした共通化など
 - その他、モジュール化や関数化した方がキレイになるなら
- - .json.eexは、.exs同様、内部にdefmodule等を同居できる
+  - .json.eexは、.exs同様、内部にdefmodule等を同居できる
