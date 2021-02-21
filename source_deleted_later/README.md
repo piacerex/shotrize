@@ -49,7 +49,7 @@ Shotrizeは、.exsファイル同様、Elixirモジュール無でElixir実行�
 HTTPメソッドとJSONファイル名のマッピングは下記の通り
 
 | HTTPメソッド | JSONファイル名 | 返却 | 挙動捕捉 | 
-| --- | --- | --- | 
+| --- | --- | --- | --- | 
 | GET（一覧） | index.json.eex | JSONに相当するElixirデータ（マップリスト、マップ、文字列、数値）を返却 | id指定不要 | 
 
 GET（個別） | show.json.eex | JSONに相当するElixirデータ（マップ、文字列、数値）を返却 | id指定でそのデータのみ返却
