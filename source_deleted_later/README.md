@@ -87,8 +87,6 @@ http://ocalhost:4000/api/mnesia/start
 - 既存ファイル書き換え
   - router.ex　※強制上書きにするか？それともphx.gen.jsonのようにmixコマンド実行時のガイド出力とするか？
   - controllers/page_controller.ex
-- 機能追加・改修　※ここはkoyoさんの対象範囲外
-  - phx.routes相当の追加
 
 # EPSONプリンタラッパーAPIのリファクタリングTODO
 
@@ -98,3 +96,9 @@ http://ocalhost:4000/api/mnesia/start
 - 各Json.postのheader指定（第4引数以降）をキーワードリスト指定なのを生かした共通化など
 - その他、モジュール化や関数化した方がキレイになるなら
   - .json.eexは、.exs同様、内部にdefmodule等を同居できる
+
+# 下記はその他残タスク　※ここはkoyoさんの対象範囲外だけど、余力あったらどぞ
+
+- doctest追加
+- 機能追加・改修
+  - phx.routes相当の追加
