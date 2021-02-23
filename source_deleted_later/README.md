@@ -12,13 +12,13 @@ depsに下記追加してビルド
 
 # EPSONプリンタラッパーAPIの動作確認
 
-ブラウザで http://ocalhost:4000/api/rest/epson/v1/ を見ると、下記が返ってくる
+ブラウザで http://localhost:4000/api/rest/epson/v1/ を見ると、下記が返ってくる
 
 ```
 { index: ok }
 ```
 
-Postman等のAPIクライアントで http://ocalhost:4000/api/rest/epson/v1/ に下記bodyでPOSTを送ると、プリンタでの印刷を呼び出せる
+Postman等のAPIクライアントで http://localhost:4000/api/rest/epson/v1/ に下記bodyでPOSTを送ると、プリンタでの印刷を呼び出せる
 （dataに指定されたURLが、NeosVRから送られてくる画像ファイルのNeosVR内パス）
 
 ```
