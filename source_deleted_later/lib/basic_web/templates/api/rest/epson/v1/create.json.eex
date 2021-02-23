@@ -7,8 +7,16 @@ IO.puts "[params]"
 IO.inspect params[ "data" ]
 IO.puts "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 
-body = %{grant_type: "password", username: "jxh51408xs2md2@print.epsonconnect.com", password: ""}
-tokens = Json.post( host, "#{ root }/oauth2/auth/token?subject=printer", BodyParser.parse( body ), [ "Content-Type": "application/x-www-form-urlencoded; charset=utf-8", "Authorization": "Basic Y2NhMjdhZmNmNDIzNDEzOWI2N2YxMzdlMDQ4MjY2M2Q6d0xlRDlDR3JGU3JuMlhOcUhjeFZVWUhkSWNhR1lyQmJzZmlOMHM0VnhRdjZuOUl2OFcyYklsWUxmbFZNU3hnRw==" ] )
+body = %{
+  "grant_type" => "password", 
+  "username"   => "jxh51408xs2md2@print.epsonconnect.com", 
+  "password"   => ""
+}
+header = [
+  "Content-Type":  "application/x-www-form-urlencoded; charset=utf-8", 
+  "Authorization": "Basic Y2NhMjdhZmNmNDIzNDEzOWI2N2YxMzdlMDQ4MjY2M2Q6d0xlRDlDR3JGU3JuMlhOcUhjeFZVWUhkSWNhR1lyQmJzZmlOMHM0VnhRdjZuOUl2OFcyYklsWUxmbFZNU3hnRw==" 
+]
+tokens = Json.post( host, "#{ root }/oauth2/auth/token?subject=printer", URI.encode_query( body ), header )
 
 body = %{
   "job_name" => "test-job",
@@ -26,19 +34,22 @@ body = %{
       "collate" => false
     }
 }
-auth_opt = ["Authorization": "Bearer #{ tokens[ "access_token" ] }"]
-printer_post_opts = Keyword.merge( ["Content-Type": "application/json; charset=utf-8"], auth_opt )
-job = Json.post( host, "#{ root }/printers/#{ printer_id }/jobs", BodyParser.parse_to_json( body ), printer_post_opts )
+hedaer_oauth2 = [ "Authorization": "Bearer #{ tokens[ "access_token" ] }" ]
+header = [
+  "Content-Type": "application/json; charset=utf-8" 
+] |> Keyword.merge( hedaer_oauth2 )
+job = Json.post( host, "#{ root }/printers/#{ printer_id }/jobs", Jason.encode!( body ), header )
 
 # filename = "C:/Users/masq_/AppData/LocalLow/Solirax/NeosVR/Assets/" <> ( params[ "data" ] |> String.split( "/" ) |> List.last )
 filename = ( params[ "data" ] |> String.split( "/" ) |> List.last )
 Json.post_no_response( "#{ job[ "upload_uri" ] }&File=1.png", "", File.read!( filename ), "Content-Type": "application/octet-stream" )
-Json.post( host, "#{ root }/printers/#{ printer_id }/jobs/#{ job[ "id" ] }/print", "", printer_post_opts )
 
-result = Json.get( host, "#{ root }/printers/#{ printer_id }/jobs/#{ job[ "id" ] }", auth_opt )
+Json.post( host, "#{ root }/printers/#{ printer_id }/jobs/#{ job[ "id" ] }/print", "", header )
+
+result = Json.get( host, "#{ root }/printers/#{ printer_id }/jobs/#{ job[ "id" ] }", hedaer_oauth2 )
 IO.puts "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 IO.puts "[result]"
 IO.inspect result
 IO.puts "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 
-{ :ok, "" }
+{ :ok, result }
