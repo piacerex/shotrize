@@ -87,6 +87,7 @@ http://ocalhost:4000/api/mnesia/start
 - 既存ファイル書き換え
   - router.ex　※強制上書きにするか？それともphx.gen.jsonのようにmixコマンド実行時のガイド出力とするか？
   - controllers/page_controller.ex
+- Smallexへのマージ＆利用
 
 # EPSONプリンタラッパーAPIのリファクタリングTODO
 
