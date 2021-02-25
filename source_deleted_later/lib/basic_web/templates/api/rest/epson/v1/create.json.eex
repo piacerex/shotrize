@@ -34,7 +34,7 @@ job = %{
   }
 } |> Client.prepare_job(tokens)
 
-job |> Client.print(printer_id, file, "1.png")
+job |> Client.upload(printer_id, file, "1.png") |> Client.print( printer_id )
 result = job |> Client.get_result(printer_id, tokens)
 
 IO.puts "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
