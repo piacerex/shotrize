@@ -1,41 +1,51 @@
-alias Epson.Printer.Client
-username          = "jxh51408xs2md2@print.epsonconnect.com"
-password          = ""
-basic_credentials = "Y2NhMjdhZmNmNDIzNDEzOWI2N2YxMzdlMDQ4MjY2M2Q6d0xlRDlDR3JGU3JuMlhOcUhjeFZVWUhkSWNhR1lyQmJzZmlOMHM0VnhRdjZuOUl2OFcyYklsWUxmbFZNU3hnRw=="
-printer_id        = "8f66cc6703f5431c8eec63d8d0fe34ac"
+defmodule Epson.V1.Create do
+  alias Epson.Printer.Client
+  @username "jxh51408xs2md2@print.epsonconnect.com"
+  @password ""
+  @basic_credentials "Y2NhMjdhZmNmNDIzNDEzOWI2N2YxMzdlMDQ4MjY2M2Q6d0xlRDlDR3JGU3JuMlhOcUhjeFZVWUhkSWNhR1lyQmJzZmlOMHM0VnhRdjZuOUl2OFcyYklsWUxmbFZNU3hnRw=="
+  @printer_id "8f66cc6703f5431c8eec63d8d0fe34ac"
+
+  def create( %{ "data" => data } ) do
+    tokens = %{
+      username:          @username,
+      password:          @password,
+      basic_credentials: @basic_credentials
+    } |> Client.request_tokens
+
+    file = data |> String.split( "/" ) |> List.last |> File.read!
+
+    job = job_payload() |> Client.prepare_job( tokens )
+
+    job |> Client.upload( @printer_id, file, "1.png" ) |> Client.print( @printer_id )
+    job |> Client.get_result( @printer_id, tokens )
+  end
+
+  defp job_payload do
+    %{
+      "job_name"   => "test-job",
+      "print_mode" => "photo",
+      "print_setting" => %{
+        "media_size"    => "ms_l",
+        "media_type"    => "mt_photopaper",
+        "borderless"    => false,
+        "print_quality" => "normal",
+        "source"        => "front1",
+        "color_mode"    => "color",
+        "2_sided"       => "none",
+        "reverse_order" => false,
+        "copies"        => 1,
+        "collate"       => false
+      }
+    }
+  end
+end
 
 IO.puts "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 IO.puts "[params]"
 IO.inspect params[ "data" ]
 IO.puts "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 
-tokens = %{
-  username:          username,
-  password:          password,
-  basic_credentials: basic_credentials
-} |> Client.request_tokens
-
-file = params[ "data" ] |> String.split( "/" ) |> List.last |> File.read!
-
-job = %{
-  "job_name"   => "test-job",
-  "print_mode" => "photo",
-  "print_setting" => %{
-    "media_size"    => "ms_l",
-    "media_type"    => "mt_photopaper",
-    "borderless"    => false,
-    "print_quality" => "normal",
-    "source"        => "front1",
-    "color_mode"    => "color",
-    "2_sided"       => "none",
-    "reverse_order" => false,
-    "copies"        => 1,
-    "collate"       => false
-  }
-} |> Client.prepare_job(tokens)
-
-job |> Client.upload(printer_id, file, "1.png") |> Client.print( printer_id )
-result = job |> Client.get_result(printer_id, tokens)
+result = Epson.V1.Create.create( params )
 
 IO.puts "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 IO.puts "[result]"
