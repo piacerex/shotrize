@@ -1,3 +1,0 @@
-:mnesia.create_schema( [ node() ] )
-:mnesia.start
-"Mnesia start"

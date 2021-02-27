@@ -1,1 +1,0 @@
-Db.query( "delete from projectors where id = #{ params[ "id" ] }" )
