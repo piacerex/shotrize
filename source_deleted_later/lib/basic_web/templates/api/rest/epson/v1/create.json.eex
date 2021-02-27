@@ -3,24 +3,37 @@ defmodule Epson.V1.Create do
   @username "jxh51408xs2md2@print.epsonconnect.com"
   @password ""
   @basic_credentials "Y2NhMjdhZmNmNDIzNDEzOWI2N2YxMzdlMDQ4MjY2M2Q6d0xlRDlDR3JGU3JuMlhOcUhjeFZVWUhkSWNhR1lyQmJzZmlOMHM0VnhRdjZuOUl2OFcyYklsWUxmbFZNU3hnRw=="
-  @printer_id "8f66cc6703f5431c8eec63d8d0fe34ac"
 
-  def create( %{ "data" => data } ) do
-    tokens = %{
-      username:          @username,
-      password:          @password,
-      basic_credentials: @basic_credentials
-    } |> Client.request_tokens
-
-    file = data |> String.split( "/" ) |> List.last |> File.read!
-
-    Client.prepare_job( job_payload(), @printer_id, tokens[ "access_token" ] )
-    |> Client.upload( file, "1.png" ) 
-    |> Client.print( @printer_id )
-    |> Client.get_result( @printer_id )
+  def authorize() do
+    data = %{
+        username:          @username,
+        password:          @password,
+        basic_credentials: @basic_credentials
+      }
+      |> Client.build_authorize
+    Json.post( data[ "host" ], data[ "path" ], data[ "body" ] |> String.replace( "%40", "@" ), data[ "header" ] )
   end
 
-  defp job_payload do
+  def get_last_from_filepath( data ), do: data |> String.split( "/" ) |> List.last |> File.read!
+
+  def create( %{ "data" => data } ) do
+    tokens   = authorize()
+IO.puts "====================="
+IO.puts "====================="
+IO.inspect tokens
+IO.puts "====================="
+IO.puts "====================="
+
+    filename = get_last_from_filepath( data )
+
+    Client.prepare_job( job(), tokens )
+
+#    |> Client.upload( filename, "1.png" ) 
+#    |> Client.print( tokens )
+#    |> Client.get_result( tokens )
+  end
+
+  defp job do
     %{
       "job_name"   => "test-job",
       "print_mode" => "photo",
