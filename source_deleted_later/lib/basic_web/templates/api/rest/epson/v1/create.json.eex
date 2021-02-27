@@ -13,8 +13,8 @@ defmodule Epson.V1.Create do
 
     create_job( payload(), tokens )
     |> upload( filebody, "1.png" ) 
-    |> Client.print( tokens )
-    |> Client.get_result( tokens )
+    |> print( tokens )
+    |> get_result( tokens )
   end
 
   defp payload do
@@ -57,6 +57,17 @@ defmodule Epson.V1.Create do
     data = Client.build_upload( job, from_filename, to_filename )
     Json.post_raw_response( data[ "host" ], data[ "path" ], data[ "body" ], data[ "header" ] )
     job
+  end
+
+  def print( job, tokens ) do
+    data = Client.build_print( job, tokens )
+    Json.post( data[ "host" ], data[ "path" ], data[ "body" ], data[ "header" ] )
+    job
+  end
+
+  def get_result( job, tokens ) do
+    data = Client.build_get_result( job, tokens )
+    Json.get( data[ "host" ], data[ "path" ], data[ "header" ] )
   end
 
 end

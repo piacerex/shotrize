@@ -55,7 +55,7 @@ defmodule Epson.Printer.Client do
     iex> Epson.Printer.Client.build_upload(%{"upload_uri"=>"https://dummy.upload_uri.com/dummy_path"}, "dummy_from_filename", "dummy_to_filename")
     
   """
-  def build_upload( %{ "upload_uri" => upload_uri } = job, file_body, to_filename ) do
+  def build_upload( %{ "upload_uri" => upload_uri }, file_body, to_filename ) do
     %{
       "host"   => upload_uri, 
       "path"   => "&File=#{ to_filename }", 
@@ -71,10 +71,13 @@ defmodule Epson.Printer.Client do
 
   ## Examples
   """
-  def print( %{ "id" => id } = job, %{ "subject_id" => printer_id, "access_token" => access_token } ) do
-    path = Path.join( [ @root, "printers", printer_id, "jobs", id, "print" ] )
-    Json.post( @host, path, "", header_json() |> Keyword.merge( header_oauth2( access_token ) ) )
-    job
+  def build_print( %{ "id" => job_id }, %{ "subject_id" => printer_id, "access_token" => access_token } ) do
+    %{
+      "host"   => @host, 
+      "path"   => Path.join( @root, "/printers/#{ printer_id }/jobs/#{ job_id }/print" ), 
+      "body"   => "", 
+      "header" => Keyword.merge( header_json(), header_oauth2( access_token ) ), 
+    }
   end
 
   @doc """
@@ -82,10 +85,13 @@ defmodule Epson.Printer.Client do
 
   ## Examples
   """
-  def get_result( %{ "id" => job_id } = job, %{ "subject_id" => printer_id, "access_token" => access_token } ) do
-    path = Path.join( [ @root, "printers", printer_id, "jobs", job_id ] )
-    Json.get( @host, path, header_oauth2( access_token ) )
-    job
+  def build_get_result( %{ "id" => job_id }, %{ "subject_id" => printer_id, "access_token" => access_token } ) do
+    %{
+      "host"   => @host, 
+      "path"   => Path.join( @root, "/printers/#{ printer_id }/jobs/#{ job_id }" ), 
+      "body"   => "", 
+      "header" => header_oauth2( access_token ),  
+    }
   end
 
   defp header_json, do: [ "Content-Type": "application/json; charset=utf-8" ]
