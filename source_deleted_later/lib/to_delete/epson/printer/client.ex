@@ -25,37 +25,39 @@ defmodule Epson.Printer.Client do
 	@doc """
 	Prepare job
 	"""
-	def prepare_job( payload, printer_id, %{ "access_token" => access_token } ) do
+	def prepare_job( payload, printer_id, access_token ) do
 		path   = Path.join( [ @root, "printers", printer_id, "jobs" ] )
-		header = header_content_type() |> Keyword.merge( header_oauth2( access_token ) )
 
-		Json.post( @host, path, Jason.encode!( payload ), header )
+		Json.post( @host, path, Jason.encode!( payload ), header_json() |> Keyword.merge( header_oauth2( access_token ) ) )
+		|> Map.put( "access_token", access_token )
 	end
 
 	@doc """
 	Upload file
 	"""
-	def upload( job = %{ "upload_uri" => upload_uri }, file, filename ) do
-		Json.post_no_response( "#{ upload_uri }&File=#{ filename }", "", file, "Content-Type": "application/octet-stream" )
+	def upload( %{ "upload_uri" => upload_uri } = job, file, filename ) do
+		Json.post_raw_response( "#{ upload_uri }&File=#{ filename }", "", file, "Content-Type": "application/octet-stream" )
 		job
 	end
 
 	@doc """
 	Print
 	"""
-	def print( %{ "id" => id }, printer_id ) do
+	def print( %{ "id" => id, "access_token" => access_token } = job, printer_id ) do
 		path = Path.join( [ @root, "printers", printer_id, "jobs", id, "print" ] )
-		Json.post( @host, path, "", header_content_type() )
+		Json.post( @host, path, "", header_json() |> Keyword.merge( header_oauth2( access_token ) ) )
+		job
 	end
 
 	@doc """
 	Get job result
 	"""
-	def get_result( %{ "id" => job_id }, printer_id, %{ "access_token" => access_token } ) do
-		path = Path.join( [ @root, "printers", printer_id, "jobs". job_id ] )
+	def get_result( %{ "id" => job_id, "access_token" => access_token } = job, printer_id ) do
+		path = Path.join( [ @root, "printers", printer_id, "jobs", job_id ] )
 		Json.get( @host, path, header_oauth2( access_token ) )
+		job
 	end
 
-	defp header_content_type, do: [ "Content-Type": "application/json; charset=utf-8" ]
-	defp header_oauth2(access_token), do: [ "Authorization": "Bearer #{access_token}" ]
+	defp header_json, do: [ "Content-Type": "application/json; charset=utf-8" ]
+	defp header_oauth2( access_token ), do: [ "Authorization": "Bearer #{ access_token }" ]
 end

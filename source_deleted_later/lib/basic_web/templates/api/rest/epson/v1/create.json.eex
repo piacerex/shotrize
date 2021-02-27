@@ -14,10 +14,10 @@ defmodule Epson.V1.Create do
 
     file = data |> String.split( "/" ) |> List.last |> File.read!
 
-    job = job_payload() |> Client.prepare_job( tokens )
-
-    job |> Client.upload( @printer_id, file, "1.png" ) |> Client.print( @printer_id )
-    job |> Client.get_result( @printer_id, tokens )
+    Client.prepare_job( job_payload(), @printer_id, tokens[ "access_token" ] )
+    |> Client.upload( file, "1.png" ) 
+    |> Client.print( @printer_id )
+    |> Client.get_result( @printer_id )
   end
 
   defp job_payload do
