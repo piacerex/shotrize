@@ -18,9 +18,9 @@ defmodule Epson.Printer.Client do
   """
   def build_authorize( %{ username: username, password: password, basic_credentials: basic_credentials } ) do
     %{
-      "host" => @host, 
-      "path" => Path.join( @root, "/oauth2/auth/token?subject=printer" ), 
-      "body" => %{
+      "host"   => @host, 
+      "path"   => Path.join( @root, "/oauth2/auth/token?subject=printer" ), 
+      "body"   => %{
         "grant_type" => "password", 
         "username"   => username, 
         "password"   => password, 
@@ -33,19 +33,23 @@ defmodule Epson.Printer.Client do
   end
 
   @doc """
-  Build data for EpsonConnect job preparer API
+  Build data for EpsonConnect create job API
 
   ## Examples
-    iex> Epson.Printer.Client.prepare_job("dummy_body", %{ "subject_id" => "dummy_printer_id", "access_token" => "dummy_access_token" })
+    iex> Epson.Printer.Client.build_create_job(%{"dummy_job_key"=>"dummy_job_value"}, %{ "subject_id" => "dummy_printer_id", "access_token" => "dummy_access_token" })
     
   """
-  def prepare_job( payload, %{ "subject_id" => printer_id, "access_token" => access_token } ) do
-    path = Path.join( @root, "/printers/#{ printer_id }/jobs" )
-    Json.post( @host, path, Jason.encode!( payload ), header_json() |> Keyword.merge( header_oauth2( access_token ) ) )
+  def build_create_job( payload, %{ "subject_id" => printer_id, "access_token" => access_token } ) do
+    %{
+      "host"   => @host, 
+      "path"   => Path.join( @root, "/printers/#{ printer_id }/jobs" ), 
+      "body"   => payload |> Jason.encode!, 
+      "header" => header_json() |> Keyword.merge( header_oauth2( access_token ) ), 
+    }
   end
 
   @doc """
-  Build data for EpsonConnect file uploader API
+  Build data for EpsonConnect upload file API
 
   ## Examples
   """
@@ -55,7 +59,7 @@ defmodule Epson.Printer.Client do
   end
 
   @doc """
-  Build data for EpsonConnect print executor API
+  Build data for EpsonConnect execute print API
 
   ## Examples
   """
@@ -66,7 +70,7 @@ defmodule Epson.Printer.Client do
   end
 
   @doc """
-  Build data for job result getter API
+  Build data for get job result API
 
   ## Examples
   """

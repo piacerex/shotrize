@@ -4,36 +4,18 @@ defmodule Epson.V1.Create do
   @password ""
   @basic_credentials "Y2NhMjdhZmNmNDIzNDEzOWI2N2YxMzdlMDQ4MjY2M2Q6d0xlRDlDR3JGU3JuMlhOcUhjeFZVWUhkSWNhR1lyQmJzZmlOMHM0VnhRdjZuOUl2OFcyYklsWUxmbFZNU3hnRw=="
 
-  def authorize() do
-    data = %{
-        username:          @username,
-        password:          @password,
-        basic_credentials: @basic_credentials
-      }
-      |> Client.build_authorize
-    Json.post( data[ "host" ], data[ "path" ], data[ "body" ] |> String.replace( "%40", "@" ), data[ "header" ] )
-  end
-
-  def get_last_from_filepath( data ), do: data |> String.split( "/" ) |> List.last |> File.read!
-
   def create( %{ "data" => data } ) do
     tokens   = authorize()
-IO.puts "====================="
-IO.puts "====================="
-IO.inspect tokens
-IO.puts "====================="
-IO.puts "====================="
-
     filename = get_last_from_filepath( data )
 
-    Client.prepare_job( job(), tokens )
+    job = create_job( payload(), tokens )
 
-#    |> Client.upload( filename, "1.png" ) 
-#    |> Client.print( tokens )
-#    |> Client.get_result( tokens )
+    Client.upload( job, filename, "1.png" ) 
+    Client.print( job, tokens )
+    Client.get_result( job, tokens )
   end
 
-  defp job do
+  defp payload do
     %{
       "job_name"   => "test-job",
       "print_mode" => "photo",
@@ -51,6 +33,24 @@ IO.puts "====================="
       }
     }
   end
+
+  def authorize() do
+    data = %{
+        username:          @username,
+        password:          @password,
+        basic_credentials: @basic_credentials
+      }
+      |> Client.build_authorize
+    Json.post( data[ "host" ], data[ "path" ], data[ "body" ] |> String.replace( "%40", "@" ), data[ "header" ] )
+  end
+
+  def create_job( job, tokens ) do
+    data = Client.build_create_job( job, tokens )
+    Json.post( data[ "host" ], data[ "path" ], data[ "body" ], data[ "header" ] )
+  end
+
+  def get_last_from_filepath( data ), do: data |> String.split( "/" ) |> List.last |> File.read!
+
 end
 
 IO.puts "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
