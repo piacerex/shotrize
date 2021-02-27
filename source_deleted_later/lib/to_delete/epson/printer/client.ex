@@ -52,10 +52,18 @@ defmodule Epson.Printer.Client do
   Build data for EpsonConnect upload file API
 
   ## Examples
+    iex> Epson.Printer.Client.build_upload(%{"upload_uri"=>"https://dummy.upload_uri.com/dummy_path"}, "dummy_from_filename", "dummy_to_filename")
+    
   """
-  def upload( %{ "upload_uri" => upload_uri } = job, file, filename ) do
-    Json.post_raw_response( "#{ upload_uri }&File=#{ filename }", "", file, "Content-Type": "application/octet-stream" )
-    job
+  def build_upload( %{ "upload_uri" => upload_uri } = job, file_body, to_filename ) do
+    %{
+      "host"   => upload_uri, 
+      "path"   => "&File=#{ to_filename }", 
+      "body"   => file_body, 
+      "header" => [
+        "Content-Type": "application/octet-stream", 
+      ], 
+    }
   end
 
   @doc """
