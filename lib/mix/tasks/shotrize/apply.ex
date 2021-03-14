@@ -1,27 +1,24 @@
 defmodule Mix.Tasks.Shotrize.Apply do
   use Mix.Task
-  import Mix.Generator
 
   @shortdoc "Apply Shotrize"
 
   def run(_args) do
-    # elixir_app_module = file_app_module |> Macro.camelize
-    create_file(web_file_path("router.ex"), spa_template(app_module: file_app_module))
+    [
+      {template_file_path("router.ex"), web_file_path("router.ex"),
+       [module: elixir_app_module()]},
+      {template_file_path("page_controller.ex"), controller_file_path("page_controller.ex"),
+       [module: elixir_app_module()]},
+      {template_file_path("api_controller.ex"), shotrize_file_path("api_controller.ex"),
+       [module: elixir_app_module(), web_dir_name: web_dir_name()]},
+      {template_file_path("rest_api_controller.ex"), shotrize_file_path("rest_api_controller.ex"),
+       [module: elixir_app_module(), web_dir_name: web_dir_name()]}
+    ]
+    |> Enum.each(fn {src, dst, assigns} -> Mix.Generator.copy_template(src, dst, assigns) end)
+  end
 
-    create_file(
-      controller_file_path("page_controller.ex"),
-      spa_template(app_module: file_app_module)
-    )
-
-    create_file(
-      shotrize_file_path("api_controller.ex"),
-      spa_template(app_module: file_app_module)
-    )
-
-    create_file(
-      shotrize_file_path("rest_api_controller.ex"),
-      spa_template(app_module: file_app_module)
-    )
+  defp elixir_app_module() do
+    file_app_module() |> Macro.camelize()
   end
 
   defp file_app_module() do
@@ -48,5 +45,7 @@ defmodule Mix.Tasks.Shotrize.Apply do
     Path.join([web_dir_path(), "controllers", filename])
   end
 
-  embed_template(:spa, "hoge")
+  defp template_file_path(filename) do
+    Path.join(["priv", "templates", "shotrize.apply", filename])
+  end
 end
