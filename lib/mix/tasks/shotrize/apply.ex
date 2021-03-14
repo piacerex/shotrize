@@ -34,7 +34,6 @@ defmodule Mix.Tasks.Shotrize.Apply do
 
   defp web_dir_path() do
     Path.join(["lib", web_dir_name()])
-    |> Path.relative_to(Mix.Project.app_path())
   end
 
   defp web_file_path(filename) do
