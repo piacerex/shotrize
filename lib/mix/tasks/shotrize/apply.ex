@@ -46,6 +46,6 @@ defmodule Mix.Tasks.Shotrize.Apply do
   end
 
   defp template_file_path(filename) do
-    Path.join(["priv", "templates", "shotrize.apply", filename])
+    Path.join([Mix.Project.app_path(), "priv", "templates", "shotrize.apply", filename])
   end
 end
