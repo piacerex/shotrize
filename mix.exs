@@ -30,6 +30,7 @@ defmodule Shotrize.MixProject do
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:earmark, "~> 1.4", only: :dev},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
+      {:smallex, git: "https://github.com/piacerex/smallex.git", branch: "v1.0"}
     ]
   end
 end
