@@ -5,47 +5,47 @@ defmodule Mix.Tasks.Shotrize.Apply do
 
   def run(_args) do
     [
-      {template_file_path("router.ex"), web_file_path("router.ex"),
-       [module: elixir_app_module()]},
-      {template_file_path("page_controller.ex"), controller_file_path("page_controller.ex"),
-       [module: elixir_app_module()]},
-      {template_file_path("api_controller.ex"), shotrize_file_path("api_controller.ex"),
-       [module: elixir_app_module(), web_dir_name: web_dir_name()]},
-      {template_file_path("rest_api_controller.ex"), shotrize_file_path("rest_api_controller.ex"),
-       [module: elixir_app_module(), web_dir_name: web_dir_name()]}
+      {
+        template_path("router.ex"),
+        web_path("router.ex"),
+        [module: elixir_web_app_module()]
+      },
+      {
+        template_path("page_controller.ex"),
+        controller_path("page_controller.ex"),
+        [module: elixir_web_app_module()]
+      },
+      {
+        template_path("api_controller.ex"),
+        controller_shotrize_path("api_controller.ex"),
+        [module: elixir_web_app_module(), web_dir_name: file_app_web_module()]
+      },
+      {
+        template_path("rest_api_controller.ex"),
+        controller_shotrize_path("rest_api_controller.ex"),
+        [module: elixir_web_app_module(), web_dir_name: file_app_web_module()]
+      }
     ]
     |> Enum.each(fn {src, dst, assigns} -> Mix.Generator.copy_template(src, dst, assigns) end)
   end
 
-  defp elixir_app_module() do
-    file_app_module() |> Macro.camelize()
-  end
+  defp file_app_module(), do: Mix.Project.config()[:app] |> Atom.to_string()
 
-  defp file_app_module() do
-    Mix.Project.config()[:app] |> Atom.to_string()
-  end
+  defp file_app_web_module(), do: file_app_module() <> "_web"
 
-  defp web_dir_name() do
-    file_app_module() <> "_web"
-  end
+  defp elixir_web_app_module(), do: file_app_web_module() |> Macro.camelize()
 
-  defp web_dir_path() do
-    Path.join(["lib", web_dir_name()])
-  end
+  defp web_dir_path(), do: Path.join(["lib", file_app_web_module()])
 
-  defp web_file_path(filename) do
-    Path.join([web_dir_path(), filename])
-  end
+  defp web_path(filename), do: Path.join([web_dir_path(), filename])
 
-  defp shotrize_file_path(filename) do
-    Path.join([web_dir_path(), "controllers", "shotrize", filename])
-  end
+  defp controller_path(filename), do: Path.join([web_dir_path(), "controllers", filename])
 
-  defp template_root_path() do
-    :shotrize |> Application.app_dir()
-  end
+  defp controller_shotrize_path(filename),
+    do: Path.join([web_dir_path(), "controllers", "shotrize", filename])
 
-  defp template_file_path(filename) do
-    Path.join([template_root_path(), "priv", "templates", "shotrize.apply", filename])
-  end
+  defp template_root_path(), do: :shotrize |> Application.app_dir()
+
+  defp template_path(filename),
+    do: Path.join([template_root_path(), "priv", "templates", "shotrize.apply", filename])
 end
