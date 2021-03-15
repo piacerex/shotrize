@@ -41,11 +41,11 @@ defmodule Mix.Tasks.Shotrize.Apply do
     Path.join([web_dir_path(), "controllers", "shotrize", filename])
   end
 
-  defp controller_file_path(filename) do
-    Path.join([web_dir_path(), "controllers", filename])
+  defp template_root_path() do
+    :shotrize |> Application.app_dir()
   end
 
   defp template_file_path(filename) do
-    Path.join([Mix.Project.app_path(), "priv", "templates", "shotrize.apply", filename])
+    Path.join([template_root_path(), "priv", "templates", "shotrize.apply", filename])
   end
 end
