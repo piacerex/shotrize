@@ -7,4 +7,3 @@ defmodule <%= @module %>.PageController do
     render(conn, content_path, params: params)
   end
 end
-
