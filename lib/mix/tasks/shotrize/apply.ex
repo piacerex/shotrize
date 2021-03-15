@@ -4,6 +4,15 @@ defmodule Mix.Tasks.Shotrize.Apply do
   @shortdoc "Apply Shotrize"
 
   def run(_args) do
+    templates()
+    |> Enum.each(fn {src, dst, assigns} -> Mix.Generator.copy_template(src, dst, assigns) end)
+  end
+
+  defp templates() do
+    base_templates() ++ html_api_templates()
+  end
+
+  defp base_templates() do
     [
       {
         template_path("router.ex"),
@@ -26,7 +35,46 @@ defmodule Mix.Tasks.Shotrize.Apply do
         [module: elixir_web_app_module(), web_dir_name: file_app_web_module()]
       }
     ]
-    |> Enum.each(fn {src, dst, assigns} -> Mix.Generator.copy_template(src, dst, assigns) end)
+  end
+
+  defp html_api_templates() do
+    [
+      {
+        template_path("sample.html.eex"),
+        web_template_page_path("sample.html.eex"),
+        []
+      },
+      {
+        template_path("sample.json.eex"),
+        web_template_api_path("sample.json.eex"),
+        []
+      },
+      {
+        template_path("index.json.eex"),
+        web_template_api_rest_path("index.json.eex"),
+        []
+      },
+      {
+        template_path("show.json.eex"),
+        web_template_api_rest_path("show.json.eex"),
+        []
+      },
+      {
+        template_path("create.json.eex"),
+        web_template_api_rest_path("create.json.eex"),
+        []
+      },
+      {
+        template_path("update.json.eex"),
+        web_template_api_rest_path("update.json.eex"),
+        []
+      },
+      {
+        template_path("delete.json.eex"),
+        web_template_api_rest_path("delete.json.eex"),
+        []
+      }
+    ]
   end
 
   defp file_app_module(), do: Mix.Project.config()[:app] |> Atom.to_string()
@@ -43,6 +91,15 @@ defmodule Mix.Tasks.Shotrize.Apply do
 
   defp controller_shotrize_path(filename),
     do: Path.join([web_dir_path(), "controllers", "shotrize", filename])
+
+  defp web_template_page_path(filename),
+    do: Path.join([web_dir_path(), "templates", "page", filename])
+
+  defp web_template_api_path(filename),
+    do: Path.join([web_dir_path(), "templates", "api", filename])
+
+  defp web_template_api_rest_path(filename),
+    do: Path.join([web_dir_path(), "templates", "api", "rest", filename])
 
   defp template_root_path(), do: :shotrize |> Application.app_dir()
 
