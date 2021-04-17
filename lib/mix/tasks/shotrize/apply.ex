@@ -1,6 +1,18 @@
 defmodule Mix.Tasks.Shotrize.Apply do
   use Mix.Task
 
+  @moduledoc """
+  Apply Shotrize on Phoenix project.
+
+  Override or create some xxx_controller files and router.ex and some template files.
+
+      mix shotrize.apply
+
+   ## Options
+     * `--api-path` - specify api template path. Defaults to "api".
+
+  """
+
   @shortdoc "Apply Shotrize"
 
   def run(_args) do
