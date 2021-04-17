@@ -1,6 +1,6 @@
 # shotrize
 
-[Shotrize](https://hex.pm/packages/shotrize) is a  Web page/API/REST API generator without MVC and router in Phoenix (it's just like PHP).
+[Shotrize](https://hex.pm/packages/shotrize) is a  Web page/API/REST API easy renderer without MVC and router in Phoenix (it's just like PHP).
 
 ## Installation
 
@@ -9,7 +9,7 @@ Add to your ```mix.exs``` file:
 ```elixir
 def deps do
   [
-    {:shotrize, "~> 0.1"}
+    {:shotrize ,git: "https://github.com/piacerex/shotrize.git", branch: "v1.0"}
   ]
 end
 ```
