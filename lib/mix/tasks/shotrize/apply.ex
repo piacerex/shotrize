@@ -15,21 +15,32 @@ defmodule Mix.Tasks.Shotrize.Apply do
 
   @shortdoc "Apply Shotrize"
 
-  def run(_args) do
-    templates()
+  @default_opts [api_path: "api"]
+
+  def run(args) do
+    args
+    |> parse()
+    |> templates()
     |> Enum.each(fn {src, dst, assigns} -> Mix.Generator.copy_template(src, dst, assigns) end)
   end
 
-  defp templates() do
-    base_templates() ++ html_api_templates()
+  defp parse(args) do
+    opts = OptionParser.parse(args, switches: [api_path: :string]) |> elem(0)
+
+    Keyword.merge(@default_opts, opts)
+    |> Keyword.get(:api_path)
   end
 
-  defp base_templates() do
+  defp templates(api_path) do
+    base_templates(api_path) ++ html_api_templates(api_path)
+  end
+
+  defp base_templates(api_path) do
     [
       {
         template_path("router.ex"),
         web_path("router.ex"),
-        [module: elixir_web_app_module()]
+        [module: elixir_web_app_module(), api_path: api_path]
       },
       {
         template_path("page_controller.ex"),
@@ -39,17 +50,17 @@ defmodule Mix.Tasks.Shotrize.Apply do
       {
         template_path("api_controller.ex"),
         controller_shotrize_path("api_controller.ex"),
-        [module: elixir_web_app_module(), web_dir_name: file_app_web_module()]
+        [module: elixir_web_app_module(), web_dir_name: file_app_web_module(), api_path: api_path]
       },
       {
         template_path("rest_api_controller.ex"),
         controller_shotrize_path("rest_api_controller.ex"),
-        [module: elixir_web_app_module(), web_dir_name: file_app_web_module()]
+        [module: elixir_web_app_module(), web_dir_name: file_app_web_module(), api_path: api_path]
       }
     ]
   end
 
-  defp html_api_templates() do
+  defp html_api_templates(api_path) do
     [
       {
         template_path("sample.html.eex"),
@@ -58,32 +69,32 @@ defmodule Mix.Tasks.Shotrize.Apply do
       },
       {
         template_path("sample.json.eex"),
-        web_template_api_path("sample.json.eex"),
+        web_template_api_path(api_path, "sample.json.eex"),
         []
       },
       {
         template_path("index.json.eex"),
-        web_template_api_rest_path("index.json.eex"),
+        web_template_api_rest_path(api_path, "index.json.eex"),
         []
       },
       {
         template_path("show.json.eex"),
-        web_template_api_rest_path("show.json.eex"),
+        web_template_api_rest_path(api_path, "show.json.eex"),
         []
       },
       {
         template_path("create.json.eex"),
-        web_template_api_rest_path("create.json.eex"),
+        web_template_api_rest_path(api_path, "create.json.eex"),
         []
       },
       {
         template_path("update.json.eex"),
-        web_template_api_rest_path("update.json.eex"),
+        web_template_api_rest_path(api_path, "update.json.eex"),
         []
       },
       {
         template_path("delete.json.eex"),
-        web_template_api_rest_path("delete.json.eex"),
+        web_template_api_rest_path(api_path, "delete.json.eex"),
         []
       }
     ]
@@ -107,11 +118,11 @@ defmodule Mix.Tasks.Shotrize.Apply do
   defp web_template_page_path(filename),
     do: Path.join([web_dir_path(), "templates", "page", filename])
 
-  defp web_template_api_path(filename),
-    do: Path.join([web_dir_path(), "templates", "api", filename])
+  defp web_template_api_path(api_path, filename),
+    do: Path.join([web_dir_path(), "templates", api_path, filename])
 
-  defp web_template_api_rest_path(filename),
-    do: Path.join([web_dir_path(), "templates", "api", "rest", filename])
+  defp web_template_api_rest_path(api_path, filename),
+    do: Path.join([web_dir_path(), "templates", api_path, "rest", filename])
 
   defp template_root_path(), do: :shotrize |> Application.app_dir()
 

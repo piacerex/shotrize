@@ -125,7 +125,7 @@ defmodule <%= @module %>.RestApiController do
     IO.inspect(params)
     IO.puts("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-    File.read!("lib/<%= @web_dir_name %>/templates/api/rest/#{path}.eex")
+    File.read!("lib/<%= @web_dir_name %>/templates/<%= @api_path %>/rest/#{path}.eex")
     |> Code.eval_string(params: params, data: params["data"])
     |> elem(0)
   end

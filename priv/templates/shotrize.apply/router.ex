@@ -13,7 +13,7 @@ defmodule <%= @module %>.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api/rest/", <%= @module %> do
+  scope "/<%= @api_path %>/rest/", <%= @module %> do
     pipe_through :api
 
     get "/*path_", RestApiController, :index
@@ -22,7 +22,7 @@ defmodule <%= @module %>.Router do
     delete "/*path_", RestApiController, :delete
   end
 
-  scope "/api/", <%= @module %> do
+  scope "/<%= @api_path %>/", <%= @module %> do
     pipe_through :api
 
     get "/*path_", ApiController, :index
