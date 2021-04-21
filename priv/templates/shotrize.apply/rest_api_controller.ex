@@ -1,5 +1,6 @@
 defmodule <%= @module %>.RestApiController do
   use <%= @module %>, :controller
+  alias Shotrize.Helper.Rest
 
   def index(conn, params) do
     {no_id_path, id} = Rest.separate_id(params["path_"])

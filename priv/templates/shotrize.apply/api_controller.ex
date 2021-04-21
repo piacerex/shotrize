@@ -1,5 +1,6 @@
 defmodule <%= @module %>.ApiController do
   use <%= @module %>, :controller
+  alias Shotrize.Helper.Rest
 
   def index(conn, params) do
     path_ = params["path_"]
