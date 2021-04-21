@@ -1,19 +1,21 @@
 defmodule Shotrize.Helper.Rest do
+  alias Shotrize.Helper.Type
+
   @doc """
   Path list devide last id
 
   ## Examples
-      iex> Rest.separate_id( [ "abc", "def", "123" ] )
+      iex> Shotrize.Helper.Rest.separate_id( [ "abc", "def", "123" ] )
       { "abc/def/", 123 }
-      iex> Rest.separate_id( [ "456" ] )
+      iex> Shotrize.Helper.Rest.separate_id( [ "456" ] )
       { "", 456 }
-      iex> Rest.separate_id( [ "abc", "def" ] )
+      iex> Shotrize.Helper.Rest.separate_id( [ "abc", "def" ] )
       { "abc/def/", nil }
-      iex> Rest.separate_id( [] )
+      iex> Shotrize.Helper.Rest.separate_id( [] )
       { "", nil }
-      iex> Rest.separate_id( [ "" ] )
+      iex> Shotrize.Helper.Rest.separate_id( [ "" ] )
       { "", nil }
-      iex> Rest.separate_id( nil )
+      iex> Shotrize.Helper.Rest.separate_id( nil )
       { "", nil }
   """
   def separate_id(nil), do: {"", nil}
@@ -28,13 +30,13 @@ defmodule Shotrize.Helper.Rest do
   Path list concat to path string
 
   ## Examples
-      iex> Rest.concat_path( [ "abc", "def" ] )
+      iex> Shotrize.Helper.Rest.concat_path( [ "abc", "def" ] )
       "abc/def/"
-      iex> Rest.concat_path( [] )
+      iex> Shotrize.Helper.Rest.concat_path( [] )
       ""
-      iex> Rest.concat_path( [ "" ] )
+      iex> Shotrize.Helper.Rest.concat_path( [ "" ] )
       ""
-      iex> Rest.concat_path( [ "", "" ] )
+      iex> Shotrize.Helper.Rest.concat_path( [ "", "" ] )
       ""
   """
   def concat_path([]), do: ""
