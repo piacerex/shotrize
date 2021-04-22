@@ -22,17 +22,36 @@ defmodule <%= @module %>.RestApiController do
 
     try do
       result = execute("#{no_id_path}#{template}", caller, params: new_params)
-
       if is_tuple(result) do
-        response(conn, caller, elem(result, 0), elem(result, 1) |> Jason.encode!())
+        case result do
+          {:ok, body} -> 
+            body = body |> to_map_if_struct  #|> inserted_to_created
+            response(conn, caller, :created, body |> Jason.encode!())
+          {_, body} ->
+            response(
+              conn,
+              caller,
+              :internal_server_error,
+              elem(body, 1) |> inspect |> Rest.error_body()
+            )
+        end
       else
-        response(conn, caller, :ok, result |> Jason.encode!())
+        body = cond do
+          is_list(result) -> result |> Enum.map(&(&1 |> to_map_if_struct))  # |> inserted_to_created))
+          true            -> result |> to_map_if_struct
+        end
+        response(conn, caller, :ok, body |> Jason.encode!())
       end
     rescue
       err ->
         response(conn, caller, :internal_server_error, err |> inspect |> Rest.error_body())
     end
   end
+
+  def to_map_if_struct(value) when is_struct(value), do: value |> Map.from_struct |> Map.delete(:__meta__)
+  def to_map_if_struct(value), do: value
+
+  def inserted_to_created(map), do: map |> Map.put(:created_at, map.inserted_at) |> Map.delete(:inserted_at)
 
   def create(conn, params) do
     {no_id_path, _} = Rest.separate_id(params["path_"])
@@ -42,19 +61,17 @@ defmodule <%= @module %>.RestApiController do
 
     try do
       result = execute("#{no_id_path}create.json", "create() on write", params: params)
-
-      if elem(result, 0) == :ok do
-        new_params = params |> Map.put("id", elem(result, 1))
-
-        response = execute("#{no_id_path}show.json", caller, params: new_params)
-        response(conn, caller, :created, response |> Jason.encode!())
-      else
-        response(
-          conn,
-          caller,
-          :internal_server_error,
-          elem(result, 1) |> inspect |> Rest.error_body()
-        )
+      case result do
+        {:ok, body} -> 
+          body = body |> to_map_if_struct  #|> inserted_to_created
+          response(conn, caller, :created, body |> Jason.encode!())
+        {_, body} ->
+          response(
+            conn,
+            caller,
+            :internal_server_error,
+            elem(body, 1) |> inspect |> Rest.error_body()
+          )
       end
     rescue
       err ->
@@ -76,15 +93,16 @@ defmodule <%= @module %>.RestApiController do
       try do
         result = execute("#{no_id_path}update.json", "update() on write", params: new_params)
 
-        if elem(result, 0) == :ok do
-          response = execute("#{no_id_path}show.json", caller, params: new_params)
-          response(conn, caller, :ok, response |> Jason.encode!())
-        else
-          response(
-            conn,
-            caller,
-            :internal_server_error,
-            elem(result, 1) |> inspect |> Rest.error_body()
+        case result do
+          {:ok, body} -> 
+            body = body |> to_map_if_struct  #|> inserted_to_created
+            response(conn, caller, :ok, body |> Jason.encode!())
+          {_, body} ->
+            response(
+              conn,
+              caller,
+              :internal_server_error,
+              elem(body, 1) |> inspect |> Rest.error_body()
           )
         end
       rescue
