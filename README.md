@@ -21,8 +21,7 @@ mix deps.get
 mix shotrize.apply
 ```
 
-Custom the templates/page, 
-templates/api, and templates/api/rest.
+Custom the templates/api, or templates/api/rest, or templates/page in your Phoenix PJ.
 
 ## License
 
