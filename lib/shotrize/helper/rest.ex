@@ -1,6 +1,4 @@
 defmodule Shotrize.Helper.Rest do
-  alias Shotrize.Helper.Type
-
   @doc """
   Path list devide last id
 
