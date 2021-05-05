@@ -1,6 +1,6 @@
 # shotrize
 
-[Shotrize](https://hex.pm/packages/shotrize) is a  Web page/API/REST API easy renderer without MVC and router in Phoenix (it's just like PHP).
+[Shotrize](https://hex.pm/packages/shotrize) is a API / REST API / Web page easy render framework (like a vanilla PHP) that doesn't require MVC and router
 
 ## Installation
 
@@ -21,8 +21,7 @@ mix deps.get
 mix shotrize.apply
 ```
 
-Custom the templates/page, 
-templates/api, and templates/api/rest.
+Custom the templates/api, or templates/api/rest, or templates/page in your Phoenix PJ.
 
 ## License
 
