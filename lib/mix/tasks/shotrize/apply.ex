@@ -1,5 +1,6 @@
 defmodule Mix.Tasks.Shotrize.Apply do
   use Mix.Task
+  alias Mix.Shotrize.Injector
 
   @moduledoc """
   Apply Shotrize on Phoenix project.
@@ -22,6 +23,9 @@ defmodule Mix.Tasks.Shotrize.Apply do
     |> parse()
     |> templates()
     |> Enum.each(fn {src, dst, assigns} -> Mix.Generator.copy_template(src, dst, assigns) end)
+
+    inject_contexts()
+    |> Enum.each(fn {src, injector_func} -> maybe_inject_files(src, injector_func) end)
   end
 
   defp parse(args) do
@@ -108,6 +112,8 @@ defmodule Mix.Tasks.Shotrize.Apply do
 
   defp web_dir_path(), do: Path.join(["lib", file_app_web_module()])
 
+  defp web_view_path(), do: Path.join(["lib", file_app_web_module() <> ".exs"])
+
   defp web_path(filename), do: Path.join([web_dir_path(), filename])
 
   defp controller_path(filename), do: Path.join([web_dir_path(), "controllers", filename])
@@ -128,4 +134,40 @@ defmodule Mix.Tasks.Shotrize.Apply do
 
   defp template_path(filename),
     do: Path.join([template_root_path(), "priv", "templates", "shotrize.apply", filename])
+
+  defp inject_contexts() do
+    [
+      {
+        web_view_path(),
+        fn file -> Injector.inject_web_view(file) end
+      }
+    ]
+  end
+
+  defp maybe_inject_files(file_path, injector_func) do
+    print_injecting(file_path)
+
+    with {:ok, file} <- File.read(file_path),
+         {:ok, new_file} <- injector_func.(file) do
+      File.write!(file_path, new_file)
+    else
+      :already_injected ->
+        print_already_injected(file_path)
+
+      {:error, reason} ->
+        print_unable_to_read_file_error(file_path, reason)
+    end
+  end
+
+  defp print_already_injected(file_path) do
+    Mix.shell().info([:yellow, "skip: already_injected ", :reset, Path.relative_to_cwd(file_path)])
+  end
+
+  defp print_injecting(file_path) do
+    Mix.shell().info([:green, "* injecting ", :reset, Path.relative_to_cwd(file_path)])
+  end
+
+  defp print_unable_to_read_file_error(file_path, reason) do
+    Mix.shell().error("#{file_path} Unable to read file: #{reason}")
+  end
 end
