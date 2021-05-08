@@ -112,7 +112,7 @@ defmodule Mix.Tasks.Shotrize.Apply do
 
   defp web_dir_path(), do: Path.join(["lib", file_app_web_module()])
 
-  defp web_view_path(), do: Path.join(["lib", file_app_web_module() <> ".exs"])
+  defp web_view_path(), do: Path.join(["lib", file_app_web_module() <> ".ex"])
 
   defp web_path(filename), do: Path.join([web_dir_path(), filename])
 
