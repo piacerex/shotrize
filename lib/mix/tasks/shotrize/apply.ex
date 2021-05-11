@@ -19,13 +19,15 @@ defmodule Mix.Tasks.Shotrize.Apply do
   @default_opts [api_path: "api"]
 
   def run(args) do
-    args
-    |> parse()
+    api_path = args |> parse()
+
+    api_path
     |> templates()
     |> Enum.each(fn {src, dst, assigns} -> Mix.Generator.copy_template(src, dst, assigns) end)
 
-    inject_contexts()
-    |> Enum.each(fn {src, injector_func} -> maybe_inject_files(src, injector_func) end)
+    api_path
+    |> inject_contexts()
+    |> Enum.each(fn {src, injector_func, note} -> maybe_inject_file(src, injector_func, note) end)
   end
 
   defp parse(args) do
@@ -41,11 +43,6 @@ defmodule Mix.Tasks.Shotrize.Apply do
 
   defp base_templates(api_path) do
     [
-      {
-        template_path("router.ex"),
-        web_path("router.ex"),
-        [module: elixir_web_app_module(), api_path: api_path]
-      },
       {
         template_path("page_controller.ex"),
         controller_path("page_controller.ex"),
@@ -135,36 +132,62 @@ defmodule Mix.Tasks.Shotrize.Apply do
   defp template_path(filename),
     do: Path.join([template_root_path(), "priv", "templates", "shotrize.apply", filename])
 
-  defp inject_contexts() do
+  defp inject_contexts(api_path) do
     [
       {
         web_view_path(),
-        fn file -> Injector.inject_web_view(file) end
+        fn file -> Injector.inject_web_view(file) end,
+        "#{web_view_path()}"
+      },
+      {
+        web_path("router.ex"),
+        fn file -> Injector.delete_page_index_route(file) end,
+        "#{web_path("router.ex")} - delete page index route"
+      },
+      {
+        web_path("router.ex"),
+        fn file -> Injector.inject_page_get_route(file, elixir_web_app_module()) end,
+        "#{web_path("router.ex")} - inject page GET route"
+      },
+      {
+        web_path("router.ex"),
+        fn file -> Injector.inject_page_post_route(file, elixir_web_app_module()) end,
+        "#{web_path("router.ex")} - inject page POST route"
+      },
+      {
+        web_path("router.ex"),
+        fn file -> Injector.inject_rest_api_routes(file, elixir_web_app_module(), api_path) end,
+        "#{web_path("router.ex")} - inject REST API routes"
+      },
+      {
+        web_path("router.ex"),
+        fn file -> Injector.inject_api_routes(file, elixir_web_app_module(), api_path) end,
+        "#{web_path("router.ex")} - inject API routes"
       }
     ]
   end
 
-  defp maybe_inject_files(file_path, injector_func) do
-    print_injecting(file_path)
+  defp maybe_inject_file(file_path, injector_func, note) do
+    print_injecting(note)
 
     with {:ok, file} <- File.read(file_path),
          {:ok, new_file} <- injector_func.(file) do
       File.write!(file_path, new_file)
     else
       :already_injected ->
-        print_already_injected(file_path)
+        print_already_injected(note)
 
       {:error, reason} ->
         print_unable_to_read_file_error(file_path, reason)
     end
   end
 
-  defp print_already_injected(file_path) do
-    Mix.shell().info([:yellow, "skip: already_injected ", :reset, Path.relative_to_cwd(file_path)])
+  defp print_already_injected(note) do
+    Mix.shell().info([:yellow, "skip: already_injected ", :reset, note])
   end
 
-  defp print_injecting(file_path) do
-    Mix.shell().info([:green, "* injecting ", :reset, Path.relative_to_cwd(file_path)])
+  defp print_injecting(note) do
+    Mix.shell().info([:green, "* injecting ", :reset, note])
   end
 
   defp print_unable_to_read_file_error(file_path, reason) do

@@ -6,7 +6,6 @@ defmodule Mix.Shotrize.Injector do
   @doc """
   Inject code into xxx_web.ex.
   """
-
   def inject_web_view(file) do
     anchor_line = "use Phoenix.View,"
     inject_code = ~s|pattern: "**/*",|
@@ -15,7 +14,7 @@ defmodule Mix.Shotrize.Injector do
     try_inject(
       file,
       inject_code,
-      fn ->
+      fn file ->
         Regex.replace(
           ~r/^(\s*)#{anchor_line}.*(\r\n|\n|$)/Um,
           file,
@@ -26,15 +25,136 @@ defmodule Mix.Shotrize.Injector do
     )
   end
 
-  defp try_inject(file, inject_code, injector_func) do
-    if already_injected?(file, inject_code) do
+  @doc """
+  Delete default page index route.
+  """
+  def delete_page_index_route(file) do
+    delete_code = ~s|get "/", PageController, :index|
+
+    {:ok,
+     Regex.replace(
+       ~r/^\s*#{delete_code}.*(\r\n|\n|$)/Um,
+       file,
+       "",
+       global: false
+     )}
+  end
+
+  @doc """
+  Inject Shotrize page GET route.
+  """
+  def inject_page_get_route(file, module_name) do
+    inject_page_route(file, ~s|get "/*path_", PageController, :index|, module_name)
+  end
+
+  @doc """
+  Inject Shotrize page POST route.
+  """
+  def inject_page_post_route(file, module_name) do
+    inject_page_route(file, ~s|post "/*path_", PageController, :index|, module_name)
+  end
+
+  defp inject_page_route(file, inject_code, module_name) do
+    anchor_line_start = ~s|scope "/", #{module_name} do|
+    anchor_line_end = ~s|end|
+    indent = "  "
+    line_endings = get_line_ending(file)
+
+    try_inject(
+      file,
+      inject_code,
+      fn file ->
+        Regex.replace(
+          ~r/([ \t]*)(#{anchor_line_start})(.*)([ \t]*#{anchor_line_end})/Us,
+          file,
+          "\\1\\2\\3\\1#{indent}#{inject_code}#{line_endings}\\4",
+          global: false
+        )
+      end
+    )
+  end
+
+  @doc """
+  Inject Shotrize REST API routes.
+  """
+  def inject_rest_api_routes(file, module_name, api_path) do
+    inject_code_anchor = ~s|scope "/#{api_path}/rest/", #{module_name} do|
+
+    inject_code =
+      ~s"""
+        scope "/#{api_path}/rest/", #{module_name} do
+          pipe_through :api
+
+          get "/*path_", RestApiController, :index
+          post "/*path_", RestApiController, :create
+          put "/*path_", RestApiController, :update
+          delete "/*path_", RestApiController, :delete
+        end
+      """
+      |> normalize_line_endings_to_file(file)
+
+    inject_before_final_end(file, inject_code_anchor, inject_code)
+  end
+
+  @doc """
+  Inject Shotrize API routes.
+  """
+  def inject_api_routes(file, module_name, api_path) do
+    inject_code_anchor = ~s|scope "/#{api_path}/", #{module_name} do|
+
+    inject_code =
+      ~s"""
+        scope "/#{api_path}/", #{module_name} do
+          pipe_through :api
+
+          get "/*path_", ApiController, :index
+          post "/*path_", ApiController, :index
+          put "/*path_", ApiController, :index
+          delete "/*path_", ApiController, :index
+        end
+      """
+      |> normalize_line_endings_to_file(file)
+
+    inject_before_final_end(file, inject_code_anchor, inject_code)
+  end
+
+  defp inject_before_final_end(file, inject_code_anchor, inject_code) do
+    line_endings = get_line_ending(file)
+
+    try_inject(
+      file,
+      inject_code_anchor,
+      fn file ->
+        Regex.replace(
+          ~r/(.*)(end)/s,
+          file,
+          "\\1#{line_endings}#{inject_code}\\2",
+          global: false
+        )
+      end
+    )
+  end
+
+  defp try_inject(file, inject_code_anchor, injector_fn) do
+    if already_injected?(file, inject_code_anchor) do
       :already_injected
     else
-      {:ok, injector_func.()}
+      {:ok, injector_fn.(file)}
     end
   end
 
-  defp already_injected?(file, inject_code) do
-    String.contains?(file, inject_code)
+  defp already_injected?(file, inject_code_anchor) do
+    String.contains?(file, inject_code_anchor)
+  end
+
+  defp normalize_line_endings_to_file(code, file) do
+    String.replace(code, "\n", get_line_ending(file))
+  end
+
+  defp get_line_ending(file) do
+    case Regex.run(~r/\r\n|\n|$/, file) do
+      [line_ending] -> line_ending
+      [] -> "\n"
+    end
   end
 end
