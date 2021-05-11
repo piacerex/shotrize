@@ -1,6 +1,8 @@
 defmodule Mix.Shotrize.InjectorTest do
   use ExUnit.Case
 
+  alias Mix.Shotrize.Injector
+
   defp convert_windows_line_endings(file) do
     file |> String.replace("\n", "\r\n")
   end
@@ -38,7 +40,7 @@ defmodule Mix.Shotrize.InjectorTest do
       end
       """
 
-      {:ok, result} = Mix.Shotrize.Injector.inject_web_view(file)
+      {:ok, result} = Injector.inject_web_view(file)
 
       assert result == injected_file
     end
@@ -46,9 +48,9 @@ defmodule Mix.Shotrize.InjectorTest do
     test "Success: already injected", context do
       file = context[:web_view_file]
 
-      {:ok, result} = Mix.Shotrize.Injector.inject_web_view(file)
+      {:ok, result} = Injector.inject_web_view(file)
 
-      assert :already_injected == Mix.Shotrize.Injector.inject_web_view(result)
+      assert :already_injected == Injector.inject_web_view(result)
     end
 
     test "Success: inject when CRLF line endings", context do
@@ -67,7 +69,7 @@ defmodule Mix.Shotrize.InjectorTest do
       end\r
       """
 
-      {:ok, result} = Mix.Shotrize.Injector.inject_web_view(file)
+      {:ok, result} = Injector.inject_web_view(file)
 
       assert result == injected_file
     end
@@ -103,7 +105,7 @@ defmodule Mix.Shotrize.InjectorTest do
       end
       """
 
-      {:ok, result} = Mix.Shotrize.Injector.delete_page_index_route(file)
+      {:ok, result} = Injector.delete_page_index_route(file)
 
       assert result == deleted_file
     end
@@ -121,7 +123,7 @@ defmodule Mix.Shotrize.InjectorTest do
       end\r
       """
 
-      {:ok, result} = Mix.Shotrize.Injector.delete_page_index_route(file)
+      {:ok, result} = Injector.delete_page_index_route(file)
 
       assert result == deleted_file
     end
@@ -142,7 +144,7 @@ defmodule Mix.Shotrize.InjectorTest do
       [route_file: file]
     end
 
-    test "inject_page_get_route", context do
+    test "Success: inject_page_get_route", context do
       file = context[:route_file]
 
       injected_file = """
@@ -156,12 +158,20 @@ defmodule Mix.Shotrize.InjectorTest do
       end
       """
 
-      {:ok, result} = Mix.Shotrize.Injector.inject_page_get_route(file, "ShotrizeWeb")
+      {:ok, result} = Injector.inject_page_get_route(file, "ShotrizeWeb")
 
       assert result == injected_file
     end
 
-    test "inject_page_get_route when CRLF line endings", context do
+    test "Success: inject_page_get_route already injected", context do
+      file = context[:route_file]
+
+      {:ok, result} = Injector.inject_page_get_route(file, "ShotrizeWeb")
+
+      assert :already_injected == Injector.inject_page_get_route(result, "ShotrizeWeb")
+    end
+
+    test "Success: inject_page_get_route when CRLF line endings", context do
       file = context[:route_file] |> convert_windows_line_endings()
 
       injected_file = """
@@ -175,12 +185,12 @@ defmodule Mix.Shotrize.InjectorTest do
       end\r
       """
 
-      {:ok, result} = Mix.Shotrize.Injector.inject_page_get_route(file, "ShotrizeWeb")
+      {:ok, result} = Injector.inject_page_get_route(file, "ShotrizeWeb")
 
       assert result == injected_file
     end
 
-    test "inject_page_post_route", context do
+    test "Success: inject_page_post_route", context do
       file = context[:route_file]
 
       injected_file = """
@@ -194,12 +204,20 @@ defmodule Mix.Shotrize.InjectorTest do
       end
       """
 
-      {:ok, result} = Mix.Shotrize.Injector.inject_page_post_route(file, "ShotrizeWeb")
+      {:ok, result} = Injector.inject_page_post_route(file, "ShotrizeWeb")
 
       assert result == injected_file
     end
 
-    test "inject_page_post_route when CRLF line endings", context do
+    test "Success: inject_page_post_route already injected", context do
+      file = context[:route_file]
+
+      {:ok, result} = Injector.inject_page_post_route(file, "ShotrizeWeb")
+
+      assert :already_injected == Injector.inject_page_post_route(result, "ShotrizeWeb")
+    end
+
+    test "Success: inject_page_post_route when CRLF line endings", context do
       file = context[:route_file] |> convert_windows_line_endings()
 
       injected_file = """
@@ -213,21 +231,17 @@ defmodule Mix.Shotrize.InjectorTest do
       end\r
       """
 
-      {:ok, result} = Mix.Shotrize.Injector.inject_page_post_route(file, "ShotrizeWeb")
+      {:ok, result} = Injector.inject_page_post_route(file, "ShotrizeWeb")
 
       assert result == injected_file
     end
 
-    test "inject_rest_api_routes", context do
+    test "Success: inject_rest_api_routes", context do
       file = context[:route_file]
 
       injected_file = """
       defmodule ShotrizeWeb.Router do
         use ShotrizeWeb, :router
-
-        scope "/", ShotrizeWeb do
-          pipe_through(:browser)
-        end
 
         scope "/api/rest/", ShotrizeWeb do
           pipe_through :api
@@ -237,24 +251,32 @@ defmodule Mix.Shotrize.InjectorTest do
           put "/*path_", RestApiController, :update
           delete "/*path_", RestApiController, :delete
         end
+
+        scope "/", ShotrizeWeb do
+          pipe_through(:browser)
+        end
       end
       """
 
-      {:ok, result} = Mix.Shotrize.Injector.inject_rest_api_routes(file, "ShotrizeWeb", "api")
+      {:ok, result} = Injector.inject_rest_api_routes(file, "ShotrizeWeb", "api")
 
       assert result == injected_file
     end
 
-    test "inject_rest_api_routes when CRLF line endings", context do
+    test "Success: inject_rest_api_routes already injected", context do
+      file = context[:route_file]
+
+      {:ok, result} = Injector.inject_rest_api_routes(file, "ShotrizeWeb", "api")
+
+      assert :already_injected == Injector.inject_rest_api_routes(result, "ShotrizeWeb", "api")
+    end
+
+    test "Success: inject_rest_api_routes when CRLF line endings", context do
       file = context[:route_file] |> convert_windows_line_endings()
 
       injected_file = """
       defmodule ShotrizeWeb.Router do\r
         use ShotrizeWeb, :router\r
-      \r
-        scope "/", ShotrizeWeb do\r
-          pipe_through(:browser)\r
-        end\r
       \r
         scope "/api/rest/", ShotrizeWeb do\r
           pipe_through :api\r
@@ -264,10 +286,14 @@ defmodule Mix.Shotrize.InjectorTest do
           put "/*path_", RestApiController, :update\r
           delete "/*path_", RestApiController, :delete\r
         end\r
+      \r
+        scope "/", ShotrizeWeb do\r
+          pipe_through(:browser)\r
+        end\r
       end\r
       """
 
-      {:ok, result} = Mix.Shotrize.Injector.inject_rest_api_routes(file, "ShotrizeWeb", "api")
+      {:ok, result} = Injector.inject_rest_api_routes(file, "ShotrizeWeb", "api")
 
       assert result == injected_file
     end
@@ -279,10 +305,6 @@ defmodule Mix.Shotrize.InjectorTest do
       defmodule ShotrizeWeb.Router do
         use ShotrizeWeb, :router
 
-        scope "/", ShotrizeWeb do
-          pipe_through(:browser)
-        end
-
         scope "/api/", ShotrizeWeb do
           pipe_through :api
 
@@ -291,24 +313,32 @@ defmodule Mix.Shotrize.InjectorTest do
           put "/*path_", ApiController, :index
           delete "/*path_", ApiController, :index
         end
+
+        scope "/", ShotrizeWeb do
+          pipe_through(:browser)
+        end
       end
       """
 
-      {:ok, result} = Mix.Shotrize.Injector.inject_api_routes(file, "ShotrizeWeb", "api")
+      {:ok, result} = Injector.inject_api_routes(file, "ShotrizeWeb", "api")
 
       assert result == injected_file
     end
 
-    test "inject_api_routes when CRLF line endings", context do
+    test "Success: inject_api_routes already injected", context do
+      file = context[:route_file]
+
+      {:ok, result} = Injector.inject_api_routes(file, "ShotrizeWeb", "api")
+
+      assert :already_injected == Injector.inject_api_routes(result, "ShotrizeWeb", "api")
+    end
+
+    test "Success: inject_api_routes when CRLF line endings", context do
       file = context[:route_file] |> convert_windows_line_endings()
 
       injected_file = """
       defmodule ShotrizeWeb.Router do\r
         use ShotrizeWeb, :router\r
-      \r
-        scope "/", ShotrizeWeb do\r
-          pipe_through(:browser)\r
-        end\r
       \r
         scope "/api/", ShotrizeWeb do\r
           pipe_through :api\r
@@ -318,10 +348,14 @@ defmodule Mix.Shotrize.InjectorTest do
           put "/*path_", ApiController, :index\r
           delete "/*path_", ApiController, :index\r
         end\r
+      \r
+        scope "/", ShotrizeWeb do\r
+          pipe_through(:browser)\r
+        end\r
       end\r
       """
 
-      {:ok, result} = Mix.Shotrize.Injector.inject_api_routes(file, "ShotrizeWeb", "api")
+      {:ok, result} = Injector.inject_api_routes(file, "ShotrizeWeb", "api")
 
       assert result == injected_file
     end

@@ -78,7 +78,7 @@ defmodule Mix.Shotrize.Injector do
   Inject Shotrize REST API routes.
   """
   def inject_rest_api_routes(file, module_name, api_path) do
-    inject_code_anchor = ~s|scope "/#{api_path}/rest/", #{module_name} do|
+    inject_code_before = ~s|scope "/", #{module_name} do|
 
     inject_code =
       ~s"""
@@ -93,14 +93,14 @@ defmodule Mix.Shotrize.Injector do
       """
       |> normalize_line_endings_to_file(file)
 
-    inject_before_final_end(file, inject_code_anchor, inject_code)
+    inject_before(file, inject_code, inject_code_before)
   end
 
   @doc """
   Inject Shotrize API routes.
   """
   def inject_api_routes(file, module_name, api_path) do
-    inject_code_anchor = ~s|scope "/#{api_path}/", #{module_name} do|
+    inject_code_before = ~s|scope "/", #{module_name} do|
 
     inject_code =
       ~s"""
@@ -115,36 +115,37 @@ defmodule Mix.Shotrize.Injector do
       """
       |> normalize_line_endings_to_file(file)
 
-    inject_before_final_end(file, inject_code_anchor, inject_code)
+    inject_before(file, inject_code, inject_code_before)
   end
 
-  defp inject_before_final_end(file, inject_code_anchor, inject_code) do
+  defp inject_before(file, inject_code, inject_code_before) do
     line_endings = get_line_ending(file)
+    [inject_code_piece | _] = String.split(inject_code, line_endings)
 
     try_inject(
       file,
-      inject_code_anchor,
+      inject_code_piece,
       fn file ->
         Regex.replace(
-          ~r/(.*)(end)/s,
+          ~r/[ \t]*#{inject_code_before}.*/s,
           file,
-          "\\1#{line_endings}#{inject_code}\\2",
+          "#{inject_code}#{line_endings}\\0",
           global: false
         )
       end
     )
   end
 
-  defp try_inject(file, inject_code_anchor, injector_fn) do
-    if already_injected?(file, inject_code_anchor) do
+  defp try_inject(file, inject_code_piece, injector_fn) do
+    if already_injected?(file, inject_code_piece) do
       :already_injected
     else
       {:ok, injector_fn.(file)}
     end
   end
 
-  defp already_injected?(file, inject_code_anchor) do
-    String.contains?(file, inject_code_anchor)
+  defp already_injected?(file, inject_code_piece) do
+    String.contains?(file, inject_code_piece)
   end
 
   defp normalize_line_endings_to_file(code, file) do
