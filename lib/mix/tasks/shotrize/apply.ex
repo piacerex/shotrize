@@ -156,14 +156,14 @@ defmodule Mix.Tasks.Shotrize.Apply do
       },
       {
         web_path("router.ex"),
-        fn file -> Injector.inject_rest_api_routes(file, elixir_web_app_module(), api_path) end,
-        "#{web_path("router.ex")} - inject REST API routes"
+        fn file -> Injector.inject_api_routes(file, elixir_web_app_module(), api_path) end,
+        "#{web_path("router.ex")} - inject API routes"
       },
       {
         web_path("router.ex"),
-        fn file -> Injector.inject_api_routes(file, elixir_web_app_module(), api_path) end,
-        "#{web_path("router.ex")} - inject API routes"
-      }
+        fn file -> Injector.inject_rest_api_routes(file, elixir_web_app_module(), api_path) end,
+        "#{web_path("router.ex")} - inject REST API routes"
+      },
     ]
   end
 

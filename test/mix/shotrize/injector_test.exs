@@ -75,7 +75,7 @@ defmodule Mix.Shotrize.InjectorTest do
     end
   end
 
-  describe "delete_page_index_route" do
+  describe "router.ex delete_page_index_route" do
     setup do
       file = """
       defmodule ShotrizeWeb.Router do
@@ -101,6 +101,7 @@ defmodule Mix.Shotrize.InjectorTest do
 
         scope "/", ShotrizeWeb do
           pipe_through(:browser)
+
         end
       end
       """
@@ -119,6 +120,7 @@ defmodule Mix.Shotrize.InjectorTest do
       \r
         scope "/", ShotrizeWeb do\r
           pipe_through(:browser)\r
+      \r
         end\r
       end\r
       """
@@ -129,7 +131,7 @@ defmodule Mix.Shotrize.InjectorTest do
     end
   end
 
-  describe "router file" do
+  describe "router.ex page route" do
     setup do
       file = """
       defmodule ShotrizeWeb.Router do
@@ -137,6 +139,7 @@ defmodule Mix.Shotrize.InjectorTest do
 
         scope "/", ShotrizeWeb do
           pipe_through(:browser)
+
         end
       end
       """
@@ -153,6 +156,7 @@ defmodule Mix.Shotrize.InjectorTest do
 
         scope "/", ShotrizeWeb do
           pipe_through(:browser)
+
           get "/*path_", PageController, :index
         end
       end
@@ -180,6 +184,7 @@ defmodule Mix.Shotrize.InjectorTest do
       \r
         scope "/", ShotrizeWeb do\r
           pipe_through(:browser)\r
+      \r
           get "/*path_", PageController, :index\r
         end\r
       end\r
@@ -199,6 +204,7 @@ defmodule Mix.Shotrize.InjectorTest do
 
         scope "/", ShotrizeWeb do
           pipe_through(:browser)
+
           post "/*path_", PageController, :index
         end
       end
@@ -226,6 +232,7 @@ defmodule Mix.Shotrize.InjectorTest do
       \r
         scope "/", ShotrizeWeb do\r
           pipe_through(:browser)\r
+      \r
           post "/*path_", PageController, :index\r
         end\r
       end\r
@@ -235,6 +242,22 @@ defmodule Mix.Shotrize.InjectorTest do
 
       assert result == injected_file
     end
+  end
+
+  describe "router.ex api route" do
+    setup do
+      file = """
+      defmodule ShotrizeWeb.Router do
+        use ShotrizeWeb, :router
+
+        pipeline :api do
+          plug :accepts, ["json"]
+        end
+      end
+      """
+
+      [route_file: file]
+    end
 
     test "Success: inject_rest_api_routes", context do
       file = context[:route_file]
@@ -243,6 +266,10 @@ defmodule Mix.Shotrize.InjectorTest do
       defmodule ShotrizeWeb.Router do
         use ShotrizeWeb, :router
 
+        pipeline :api do
+          plug :accepts, ["json"]
+        end
+
         scope "/api/rest/", ShotrizeWeb do
           pipe_through :api
 
@@ -250,10 +277,6 @@ defmodule Mix.Shotrize.InjectorTest do
           post "/*path_", RestApiController, :create
           put "/*path_", RestApiController, :update
           delete "/*path_", RestApiController, :delete
-        end
-
-        scope "/", ShotrizeWeb do
-          pipe_through(:browser)
         end
       end
       """
@@ -278,6 +301,10 @@ defmodule Mix.Shotrize.InjectorTest do
       defmodule ShotrizeWeb.Router do\r
         use ShotrizeWeb, :router\r
       \r
+        pipeline :api do\r
+          plug :accepts, ["json"]\r
+        end\r
+      \r
         scope "/api/rest/", ShotrizeWeb do\r
           pipe_through :api\r
       \r
@@ -285,10 +312,6 @@ defmodule Mix.Shotrize.InjectorTest do
           post "/*path_", RestApiController, :create\r
           put "/*path_", RestApiController, :update\r
           delete "/*path_", RestApiController, :delete\r
-        end\r
-      \r
-        scope "/", ShotrizeWeb do\r
-          pipe_through(:browser)\r
         end\r
       end\r
       """
@@ -305,6 +328,10 @@ defmodule Mix.Shotrize.InjectorTest do
       defmodule ShotrizeWeb.Router do
         use ShotrizeWeb, :router
 
+        pipeline :api do
+          plug :accepts, ["json"]
+        end
+
         scope "/api/", ShotrizeWeb do
           pipe_through :api
 
@@ -312,10 +339,6 @@ defmodule Mix.Shotrize.InjectorTest do
           post "/*path_", ApiController, :index
           put "/*path_", ApiController, :index
           delete "/*path_", ApiController, :index
-        end
-
-        scope "/", ShotrizeWeb do
-          pipe_through(:browser)
         end
       end
       """
@@ -340,6 +363,10 @@ defmodule Mix.Shotrize.InjectorTest do
       defmodule ShotrizeWeb.Router do\r
         use ShotrizeWeb, :router\r
       \r
+        pipeline :api do\r
+          plug :accepts, ["json"]\r
+        end\r
+      \r
         scope "/api/", ShotrizeWeb do\r
           pipe_through :api\r
       \r
@@ -347,10 +374,6 @@ defmodule Mix.Shotrize.InjectorTest do
           post "/*path_", ApiController, :index\r
           put "/*path_", ApiController, :index\r
           delete "/*path_", ApiController, :index\r
-        end\r
-      \r
-        scope "/", ShotrizeWeb do\r
-          pipe_through(:browser)\r
         end\r
       end\r
       """

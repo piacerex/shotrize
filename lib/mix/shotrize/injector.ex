@@ -33,7 +33,7 @@ defmodule Mix.Shotrize.Injector do
 
     {:ok,
      Regex.replace(
-       ~r/^\s*#{delete_code}.*(\r\n|\n|$)/Um,
+       ~r/^[ \t]*#{delete_code}.*(\r\n|\n|$)/Um,
        file,
        "",
        global: false
@@ -78,8 +78,6 @@ defmodule Mix.Shotrize.Injector do
   Inject Shotrize REST API routes.
   """
   def inject_rest_api_routes(file, module_name, api_path) do
-    inject_code_before = ~s|scope "/", #{module_name} do|
-
     inject_code =
       ~s"""
         scope "/#{api_path}/rest/", #{module_name} do
@@ -93,15 +91,13 @@ defmodule Mix.Shotrize.Injector do
       """
       |> normalize_line_endings_to_file(file)
 
-    inject_before(file, inject_code, inject_code_before)
+    inject_after_api_pipeline(file, inject_code)
   end
 
   @doc """
   Inject Shotrize API routes.
   """
   def inject_api_routes(file, module_name, api_path) do
-    inject_code_before = ~s|scope "/", #{module_name} do|
-
     inject_code =
       ~s"""
         scope "/#{api_path}/", #{module_name} do
@@ -115,11 +111,14 @@ defmodule Mix.Shotrize.Injector do
       """
       |> normalize_line_endings_to_file(file)
 
-    inject_before(file, inject_code, inject_code_before)
+    inject_after_api_pipeline(file, inject_code)
   end
 
-  defp inject_before(file, inject_code, inject_code_before) do
+  defp inject_after_api_pipeline(file, inject_code) do
+    anchor_line_start = ~s|pipeline :api do|
+    anchor_line_end = ~s|end|
     line_endings = get_line_ending(file)
+
     [inject_code_piece | _] = String.split(inject_code, line_endings)
 
     try_inject(
@@ -127,9 +126,9 @@ defmodule Mix.Shotrize.Injector do
       inject_code_piece,
       fn file ->
         Regex.replace(
-          ~r/[ \t]*#{inject_code_before}.*/s,
+          ~r/#{anchor_line_start}.*#{anchor_line_end}#{line_endings}/Us,
           file,
-          "#{inject_code}#{line_endings}\\0",
+          "\\0#{line_endings}#{inject_code}",
           global: false
         )
       end
