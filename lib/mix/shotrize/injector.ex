@@ -75,9 +75,9 @@ defmodule Mix.Shotrize.Injector do
   end
 
   @doc """
-  Inject Shotrize REST API routes.
+  Inject Shotrize API and REST API routes.
   """
-  def inject_rest_api_routes(file, module_name, api_path) do
+  def inject_api_routes(file, module_name, api_path) do
     inject_code =
       ~s"""
         scope "/#{api_path}/rest/", #{module_name} do
@@ -88,18 +88,7 @@ defmodule Mix.Shotrize.Injector do
           put "/*path_", RestApiController, :update
           delete "/*path_", RestApiController, :delete
         end
-      """
-      |> normalize_line_endings_to_file(file)
 
-    inject_after_api_pipeline(file, inject_code)
-  end
-
-  @doc """
-  Inject Shotrize API routes.
-  """
-  def inject_api_routes(file, module_name, api_path) do
-    inject_code =
-      ~s"""
         scope "/#{api_path}/", #{module_name} do
           pipe_through :api
 

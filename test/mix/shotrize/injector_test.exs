@@ -259,7 +259,7 @@ defmodule Mix.Shotrize.InjectorTest do
       [route_file: file]
     end
 
-    test "Success: inject_rest_api_routes", context do
+    test "Success: inject_api_routes", context do
       file = context[:route_file]
 
       injected_file = """
@@ -277,59 +277,6 @@ defmodule Mix.Shotrize.InjectorTest do
           post "/*path_", RestApiController, :create
           put "/*path_", RestApiController, :update
           delete "/*path_", RestApiController, :delete
-        end
-      end
-      """
-
-      {:ok, result} = Injector.inject_rest_api_routes(file, "ShotrizeWeb", "api")
-
-      assert result == injected_file
-    end
-
-    test "Success: inject_rest_api_routes already injected", context do
-      file = context[:route_file]
-
-      {:ok, result} = Injector.inject_rest_api_routes(file, "ShotrizeWeb", "api")
-
-      assert :already_injected == Injector.inject_rest_api_routes(result, "ShotrizeWeb", "api")
-    end
-
-    test "Success: inject_rest_api_routes when CRLF line endings", context do
-      file = context[:route_file] |> convert_windows_line_endings()
-
-      injected_file = """
-      defmodule ShotrizeWeb.Router do\r
-        use ShotrizeWeb, :router\r
-      \r
-        pipeline :api do\r
-          plug :accepts, ["json"]\r
-        end\r
-      \r
-        scope "/api/rest/", ShotrizeWeb do\r
-          pipe_through :api\r
-      \r
-          get "/*path_", RestApiController, :index\r
-          post "/*path_", RestApiController, :create\r
-          put "/*path_", RestApiController, :update\r
-          delete "/*path_", RestApiController, :delete\r
-        end\r
-      end\r
-      """
-
-      {:ok, result} = Injector.inject_rest_api_routes(file, "ShotrizeWeb", "api")
-
-      assert result == injected_file
-    end
-
-    test "inject_api_routes", context do
-      file = context[:route_file]
-
-      injected_file = """
-      defmodule ShotrizeWeb.Router do
-        use ShotrizeWeb, :router
-
-        pipeline :api do
-          plug :accepts, ["json"]
         end
 
         scope "/api/", ShotrizeWeb do
@@ -365,6 +312,15 @@ defmodule Mix.Shotrize.InjectorTest do
       \r
         pipeline :api do\r
           plug :accepts, ["json"]\r
+        end\r
+      \r
+        scope "/api/rest/", ShotrizeWeb do\r
+          pipe_through :api\r
+      \r
+          get "/*path_", RestApiController, :index\r
+          post "/*path_", RestApiController, :create\r
+          put "/*path_", RestApiController, :update\r
+          delete "/*path_", RestApiController, :delete\r
         end\r
       \r
         scope "/api/", ShotrizeWeb do\r
