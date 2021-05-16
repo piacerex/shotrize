@@ -19,22 +19,33 @@ defmodule Mix.Tasks.Shotrize.Apply do
   @default_opts [api_path: "api"]
 
   def run(args) do
-    api_path = args |> parse()
-
-    api_path
-    |> templates()
-    |> Enum.each(fn {src, dst, assigns} -> Mix.Generator.copy_template(src, dst, assigns) end)
-
-    api_path
-    |> inject_contexts()
-    |> Enum.each(fn {src, injector_func, note} -> maybe_inject_file(src, injector_func, note) end)
+    args
+    |> parse()
+    |> generate_files()
+    |> inject_files()
   end
 
   defp parse(args) do
     opts = OptionParser.parse(args, switches: [api_path: :string]) |> elem(0)
 
     Keyword.merge(@default_opts, opts)
-    |> Keyword.get(:api_path)
+    |> Map.new
+  end
+
+  defp generate_files(context = %{api_path: api_path}) do
+    api_path
+    |> templates()
+    |> Enum.each(fn {src, dst, assigns} -> Mix.Generator.copy_template(src, dst, assigns) end)
+
+    context
+  end
+
+  defp inject_files(context = %{api_path: api_path}) do
+    api_path
+    |> inject_list()
+    |> Enum.each(fn {src, injector_func, note} -> maybe_inject_file(src, injector_func, note) end)
+
+    context
   end
 
   defp templates(api_path) do
@@ -132,7 +143,7 @@ defmodule Mix.Tasks.Shotrize.Apply do
   defp template_path(filename),
     do: Path.join([template_root_path(), "priv", "templates", "shotrize.apply", filename])
 
-  defp inject_contexts(api_path) do
+  defp inject_list(api_path) do
     [
       {
         web_view_path(),
