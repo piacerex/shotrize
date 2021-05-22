@@ -1,8 +1,4 @@
 defmodule Mix.Tasks.Shotrize.Routes do
-  use Mix.Task
-
-  alias Mix.Shotrize
-
   @moduledoc """
   Prints Shotrize routes
 
@@ -10,6 +6,9 @@ defmodule Mix.Tasks.Shotrize.Routes do
   """
 
   @shortdoc "Prints Shotrize routes"
+
+  use Mix.Task
+  alias Mix.Shotrize
 
   def run(_args) do
     shotrize_route_context()

@@ -10,7 +10,6 @@ defmodule Mix.Shotrize do
     iex> Mix.Shotrize.installed_app_name
     "shotrize"
   """
-
   def installed_app_name(), do: Mix.Project.config()[:app] |> Atom.to_string()
 
   @doc """

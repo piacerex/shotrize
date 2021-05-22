@@ -1,8 +1,4 @@
 defmodule Mix.Tasks.Shotrize.Apply do
-  use Mix.Task
-  alias Mix.Shotrize
-  alias Mix.Shotrize.Injector
-
   @moduledoc """
   Apply Shotrize on Phoenix project.
 
@@ -16,6 +12,10 @@ defmodule Mix.Tasks.Shotrize.Apply do
   """
 
   @shortdoc "Apply Shotrize"
+
+  use Mix.Task
+  alias Mix.Shotrize
+  alias Mix.Shotrize.Injector
 
   @default_opts [api_path: "api"]
 
