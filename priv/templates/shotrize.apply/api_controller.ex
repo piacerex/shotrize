@@ -4,7 +4,7 @@ defmodule <%= @module %>.ApiController do
 
   def index(conn, params) do
     path_ = params["path_"]
-    content_path = if path_ == [], do: "index.json", else: Path.join(path_)
+    content_path = if path_ == [], do: "index", else: Path.join(path_)
 
     try do
       result = execute("#{content_path}.json", "index()", params: params)
