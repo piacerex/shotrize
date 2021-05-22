@@ -1,5 +1,6 @@
 defmodule Mix.Tasks.Shotrize.Apply do
   use Mix.Task
+  alias Mix.Shotrize
   alias Mix.Shotrize.Injector
 
   @moduledoc """
@@ -29,7 +30,7 @@ defmodule Mix.Tasks.Shotrize.Apply do
     opts = OptionParser.parse(args, switches: [api_path: :string]) |> elem(0)
 
     Keyword.merge(@default_opts, opts)
-    |> Map.new
+    |> Map.new()
   end
 
   defp generate_files(context = %{api_path: api_path}) do
@@ -62,12 +63,20 @@ defmodule Mix.Tasks.Shotrize.Apply do
       {
         template_path("api_controller.ex"),
         controller_shotrize_path("api_controller.ex"),
-        [module: elixir_web_app_module(), web_dir_name: file_app_web_module(), api_path: api_path]
+        [
+          module: elixir_web_app_module(),
+          web_dir_name: Shotrize.installed_app_web_name(),
+          api_path: api_path
+        ]
       },
       {
         template_path("rest_api_controller.ex"),
         controller_shotrize_path("rest_api_controller.ex"),
-        [module: elixir_web_app_module(), web_dir_name: file_app_web_module(), api_path: api_path]
+        [
+          module: elixir_web_app_module(),
+          web_dir_name: Shotrize.installed_app_web_name(),
+          api_path: api_path
+        ]
       }
     ]
   end
@@ -112,15 +121,11 @@ defmodule Mix.Tasks.Shotrize.Apply do
     ]
   end
 
-  defp file_app_module(), do: Mix.Project.config()[:app] |> Atom.to_string()
+  defp elixir_web_app_module(), do: Shotrize.installed_app_web_name() |> Macro.camelize()
 
-  defp file_app_web_module(), do: file_app_module() <> "_web"
+  defp web_dir_path(), do: Path.join(["lib", Shotrize.installed_app_web_name()])
 
-  defp elixir_web_app_module(), do: file_app_web_module() |> Macro.camelize()
-
-  defp web_dir_path(), do: Path.join(["lib", file_app_web_module()])
-
-  defp web_view_path(), do: Path.join(["lib", file_app_web_module() <> ".ex"])
+  defp web_view_path(), do: Path.join(["lib", Shotrize.installed_app_web_name() <> ".ex"])
 
   defp web_path(filename), do: Path.join([web_dir_path(), filename])
 
@@ -169,7 +174,7 @@ defmodule Mix.Tasks.Shotrize.Apply do
         web_path("router.ex"),
         fn file -> Injector.inject_api_routes(file, elixir_web_app_module(), api_path) end,
         "#{web_path("router.ex")} - inject API and REST API routes"
-      },
+      }
     ]
   end
 
