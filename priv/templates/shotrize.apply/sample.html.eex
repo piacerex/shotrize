@@ -1,2 +1,2 @@
 <h1>sample!!</h1>
-<p>params is <%= @params |> inspect %> </p>
+<p>params is <%%= @params |> inspect %> </p>
