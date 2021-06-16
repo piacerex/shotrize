@@ -1,1 +1,1 @@
-%{ "sample" => :ok }
+%{ "sample" => :ok, "params": @params }

@@ -30,7 +30,9 @@ defmodule <%= @module %>.ApiController do
     IO.puts("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
     File.read!("lib/<%= @web_dir_name %>/templates/<%= @api_path %>/#{path}.eex")
-    |> Code.eval_string(params: params, data: params["data"])
+    |> Shotrize.Helper.Eex.to_eex_string()
+    |> EEx.eval_string(assigns: [params: params])
+    |> Code.eval_string()
     |> elem(0)
   end
 

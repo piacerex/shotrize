@@ -24,7 +24,7 @@ defmodule <%= @module %>.RestApiController do
       result = execute("#{no_id_path}#{template}", caller, params: new_params)
       if is_tuple(result) do
         case result do
-          {:ok, body} -> 
+          {:ok, body} ->
             body = body |> to_map_if_struct  #|> inserted_to_created
             response(conn, caller, :created, body |> Jason.encode!())
           {_, body} ->
@@ -62,7 +62,7 @@ defmodule <%= @module %>.RestApiController do
     try do
       result = execute("#{no_id_path}create.json", "create() on write", params: params)
       case result do
-        {:ok, body} -> 
+        {:ok, body} ->
           body = body |> to_map_if_struct  #|> inserted_to_created
           response(conn, caller, :created, body |> Jason.encode!())
         {_, body} ->
@@ -94,7 +94,7 @@ defmodule <%= @module %>.RestApiController do
         result = execute("#{no_id_path}update.json", "update() on write", params: new_params)
 
         case result do
-          {:ok, body} -> 
+          {:ok, body} ->
             body = body |> to_map_if_struct  #|> inserted_to_created
             response(conn, caller, :ok, body |> Jason.encode!())
           {_, body} ->
@@ -145,7 +145,9 @@ defmodule <%= @module %>.RestApiController do
     IO.puts("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
     File.read!("lib/<%= @web_dir_name %>/templates/<%= @api_path %>/rest/#{path}.eex")
-    |> Code.eval_string(params: params, data: params["data"])
+    |> Shotrize.Helper.Eex.to_eex_string()
+    |> EEx.eval_string(assigns: [params: params])
+    |> Code.eval_string()
     |> elem(0)
   end
 
