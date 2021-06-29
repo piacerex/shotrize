@@ -6,8 +6,8 @@ defmodule Mix.Tasks.Shotrize.Apply do
 
       mix shotrize.apply
 
-   ## Options
-     * `--api-path` - specify api template path. Defaults to "api".
+  ## Options
+    * `--api-path` - specify api template path. Defaults to "api".
 
   """
 

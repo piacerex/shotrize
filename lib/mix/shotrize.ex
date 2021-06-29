@@ -7,8 +7,8 @@ defmodule Mix.Shotrize do
     Application name installed Shotrize
 
   ## Examples
-    iex> Mix.Shotrize.installed_app_name
-    "shotrize"
+      iex> Mix.Shotrize.installed_app_name
+      "shotrize"
   """
   def installed_app_name(), do: Mix.Project.config()[:app] |> Atom.to_string()
 
@@ -18,8 +18,8 @@ defmodule Mix.Shotrize do
     Shotrize assumes that Phoenix is installed.
 
   ## Examples
-    iex> Mix.Shotrize.installed_app_web_name
-    "shotrize_web"
+      iex> Mix.Shotrize.installed_app_web_name
+      "shotrize_web"
   """
   def installed_app_web_name(), do: installed_app_name() <> "_web"
 end
