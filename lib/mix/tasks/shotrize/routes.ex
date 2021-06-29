@@ -73,7 +73,7 @@ defmodule Mix.Tasks.Shotrize.Routes do
     end
   end
 
-  def page_route(%{dir: dir, current_path: path}) do
+  defp page_route(%{dir: dir, current_path: path}) do
     route_with_format = path |> String.split(".") |> Enum.take(2) |> Enum.join(".")
 
     Path.join(dir, route_with_format)
